@@ -3,8 +3,7 @@ from sklearn.metrics.pairwise import cosine_similarity
 
 import spacy
 import nltk
-nltk.download('wordnet')
-from nltk.corpus import wordnet
+
 from collections import Counter
 import numpy as np
 

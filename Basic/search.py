@@ -1,3 +1,4 @@
+from sklearn.feature_extraction.text import TfidfVectorizer
 from match import cosine
 
 def search_by_keyword_match(query, db):
@@ -28,3 +29,7 @@ def search_by_cosine_match(query, db):
             best_record = record
     return best_score, best_record
 
+def vectorize(records) : 
+    vectorizer = TfidfVectorizer()
+    tfidf_matrix = vectorizer.fit_transform(records)
+    return vectorizer, tfidf_matrix
