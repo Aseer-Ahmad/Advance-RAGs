@@ -18,3 +18,12 @@ A type system like Python’s TypedDict can define the agent's state structure.
 State refers to transient execution information—what the agent is doing right now. It disappears once the task ends.
 
 Session memory covers the broader conversation, tracking tools used, decisions made, and prior responses across steps. While state helps with immediate logic, memory helps the agent act coherently over time.
+
+
+# Four Dimensions of Evaluation
+Effective evaluation looks across multiple dimensions:
+
+- Task Completion: Did the agent achieve its goal? How many steps did it take? Was human intervention needed?
+- Quality Control: Was the output in the correct format? Did it follow prompt instructions and use the provided context?
+- Tool Interaction: Did the agent choose appropriate tools and use valid arguments?
+- System Metrics: How efficient was the run in terms of time, token usage, and failure rates?
