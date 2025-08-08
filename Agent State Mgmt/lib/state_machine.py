@@ -3,14 +3,21 @@ from dataclasses import dataclass, field
 from datetime import datetime
 import uuid
 import copy
+import inspect
 
 
 StateSchema = TypeVar("StateSchema")
+
+@dataclass
+class Resource:
+    vars: Dict[str, Any]
 
 class Step(Generic[StateSchema]):
     def __init__(self, step_id: str, logic: Callable[[StateSchema], Dict]):
         self.step_id = step_id
         self.logic = logic
+        # Store the number of parameters the logic function expects
+        self.logic_params_count = self._calculate_params_count()
 
     def __str__(self) -> str:
         return f"Step('{self.step_id}')"
@@ -18,8 +25,26 @@ class Step(Generic[StateSchema]):
     def __repr__(self) -> str:
         return self.__str__()
 
-    def run(self, state: StateSchema, state_schema: Type[StateSchema]) -> StateSchema:
-        result = self.logic(state)
+    def _calculate_params_count(self):
+        """Calculate the number of parameters excluding 'self' for bound methods"""
+        if inspect.ismethod(self.logic):
+            # For bound methods, subtract 1 to exclude 'self'
+            return self.logic.__func__.__code__.co_argcount - 1
+        else:
+            # For regular functions
+            return self.logic.__code__.co_argcount
+
+    def run(self, state: StateSchema, state_schema: Type[StateSchema], resource: Resource=None) -> StateSchema:
+        # Call logic function with appropriate number of arguments
+        if self.logic_params_count == 1:
+            result = self.logic(state)
+        elif self.logic_params_count == 2:
+            result = self.logic(state, resource)
+        else:
+            raise ValueError(
+                f"Step '{self.step_id}' logic function must accept either 1 argument (state) "
+                f"or 2 arguments (state, resource). Found {self.logic_params_count} arguments."
+            ) 
         # Get expected fields from the TypedDict
         expected_fields = get_type_hints(state_schema)
         
@@ -176,7 +201,7 @@ class StateMachine(Generic[StateSchema]):
             self.transitions[src_id] = []
         self.transitions[src_id].append(transition)
 
-    def run(self, state: StateSchema):
+    def run(self, state: StateSchema, resource: Resource = None):
         # Validate that state has at least one field from the schema
         expected_fields = get_type_hints(self.state_schema)
         state_fields = set(state.keys())
@@ -203,7 +228,7 @@ class StateMachine(Generic[StateSchema]):
                 break
             
             # Replace state entirely
-            state = step.run(state, self.state_schema)  
+            state = step.run(state, self.state_schema, resource)  
 
             if isinstance(step, EntryPoint):
                 print(f"[StateMachine] Starting: {current_step_id}")
