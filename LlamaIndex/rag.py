@@ -14,6 +14,10 @@ from llama_index.core import StorageContext, load_index_from_storage
 
 from llama_index.embeddings.huggingface import HuggingFaceEmbedding
 
+import chromadb
+from llama_index.core import VectorStoreIndex
+from llama_index.vector_stores.chroma import ChromaVectorStore
+from llama_index.core import StorageContext
 
 import os
 import getpass
@@ -51,7 +55,7 @@ def readData():
     pprint.pprint(docs)
     return docs
 
-def getTransformations(docs : Document) :
+def getTransformations(docs) :
     
     llm_transformations = Groq(model="qwen-2.5-32b", api_key=os.environ["GROQ_API_KEY"])
     text_splitter = SentenceSplitter(separator=" ", chunk_size=1024, chunk_overlap=128)
@@ -100,6 +104,20 @@ def query(index, query):
     response = query_engine.query(query)
     print(response)
 
+def ChromaIndex():
+    db = chromadb.PersistentClient(path="./chroma_db")
+    chroma_collection = db.get_or_create_collection("healthGPT")
+
+    vector_store = ChromaVectorStore(chroma_collection=chroma_collection)
+    storage_context = StorageContext.from_defaults(vector_store=vector_store)
+
+    # create index
+    docs = readData()
+    nodes = getTransformations(docs)
+    hf_embeddings = getEmbeddingModel()
+    index = VectorStoreIndex(nodes, storage_context=storage_context, embed_model=hf_embeddings)
+
+    return index
 
 
 
