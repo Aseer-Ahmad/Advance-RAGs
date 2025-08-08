@@ -59,6 +59,7 @@ class Weavite_Hybrid :
             create_schema_if_missing=True,
         )
 
+
     def get_model_pipeline(self):
 
         model_name = "HuggingFaceH4/zephyr-7b-beta"
@@ -80,7 +81,7 @@ class Weavite_Hybrid :
         self.tokenizer = AutoTokenizer.from_pretrained(model_name, return_token_type_ids=False)
         self.tokenizer.bos_token_id = 1
 
-        self.pipeline = HuggingFacePipeline(pipeline(
+        self.llm = HuggingFacePipeline(pipeline(
             "text-generation",
             model=self.model,
             tokenizer=self.tokenizer,
@@ -101,4 +102,26 @@ class Weavite_Hybrid :
 
         loader = PyPDFLoader(doc_pth)
         self.docs = loader.load()
+
+        self.retriever.add_documents(self.docs)
+
+    def query(self, query) : 
+        from langchain.chains import RetrievalQA
+        from langchain_core.prompts import ChatPromptTemplate
+
+        system_prompt = (
+            "Use the given context to answer the question. "
+            "If you don't know the answer, say you don't know. "
+            "Use three sentence maximum and keep the answer concise. "
+            "Context: {context}"
+        )
+
+        prompt = ChatPromptTemplate.from_messages(
+            [
+                ("system", system_prompt),
+                ("human", "{query}"),
+            ]
+        )
+
+
         
