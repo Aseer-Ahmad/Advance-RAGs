@@ -94,11 +94,10 @@ model.save_pretrained("lora_model")  # Local saving
 tokenizer.save_pretrained("lora_model")
 
 # inference
-
 FastVisionModel.for_inference(model) # Enable for inference!
 
 image = dataset[0]["image"]
-instruction = " "
+instruction = "What is in this ? "
 
 messages = [
     {"role": "user", "content": [
