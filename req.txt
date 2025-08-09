@@ -3,3 +3,6 @@ faiss
 torch
 transformers
 pillow
+pandas
+pyarrow
+fastparquet
