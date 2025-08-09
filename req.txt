@@ -6,3 +6,4 @@ pillow
 pandas
 pyarrow
 fastparquet
+unsloth

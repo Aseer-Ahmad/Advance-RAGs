@@ -108,7 +108,9 @@ class CLIP_RAG:
         q_emb = self.embed_query(query_text, query_image)
 
         scores, indices = self.index.search(q_emb, k)  # scores are inner products
-        results = self.metadatas[indices[0]]
+        print(scores)
+        print(indices)
+        results = self.metadatas[indices[0][0]]
         # results = self.metadf.iloc[indices[0]].to_dict(orient="records")
 
         print("Top results:", results)
@@ -118,12 +120,12 @@ class CLIP_RAG:
 if __name__ == '__main__' : 
     
     dataset = [
-        {"image_path": "data/imgs/apple.jpg", "metadata_text": "apple"},
-        {"image_path": "data/imgs/clock.jpg", "metadata_text": "clock"},
+        {"image_path": "data/imgs/apple.jpg", "metadata_text": "This is apple"},
+        {"image_path": "data/imgs/clock.jpg", "metadata_text": "This is clock"},
     ]
 
     clipindex = CLIP_RAG(dataset, fuse_type="hadamard")
     clipindex.setModel()
     clipindex.generateEmbeddings()
 
-    clipindex.retreive("what is this", "data/imgs/apple.jpg", k = 1)
+    clipindex.retreive("what is this", "data/imgs/clock3.jpg", k = 1)
