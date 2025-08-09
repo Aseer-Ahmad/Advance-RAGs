@@ -1,1 +1,0 @@
-# clip_query.py
