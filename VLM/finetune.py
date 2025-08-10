@@ -7,7 +7,7 @@ import torch
 from datasets import load_dataset
 
 
-dataset = None # load_dataset("unsloth/Radiology_mini", split="train")
+dataset = load_dataset("aseeransari/ventory", split="train")
 
 model, tokenizer = FastVisionModel.from_pretrained(
     "unsloth/Llama-3.2-11B-Vision-Instruct",
@@ -33,11 +33,11 @@ model = FastVisionModel.get_peft_model(
 )
 
 
-def convert_to_conversation(sample, instruction):
+def convert_to_conversation(sample):
     conversation = [
         { "role": "user",
           "content" : [
-            {"type" : "text",  "text"  : instruction},
+            {"type" : "text",  "text"  : "What is this ?"},
             {"type" : "image", "image" : sample["image"]} ]
         },
         { "role" : "assistant",
@@ -90,14 +90,14 @@ print(f"{start_gpu_memory} GB of memory reserved.")
 trainer_stats = trainer.train()
 
 
-model.save_pretrained("lora_model")  # Local saving
-tokenizer.save_pretrained("lora_model")
+model.save_pretrained("ventory_model")  # Local saving
+tokenizer.save_pretrained("ventory_tokenizer")
 
 # inference
 FastVisionModel.for_inference(model) # Enable for inference!
 
 image = dataset[0]["image"]
-instruction = "What is in this ? "
+instruction = "What is this ?"
 
 messages = [
     {"role": "user", "content": [
